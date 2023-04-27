@@ -12,37 +12,35 @@ class TodoPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todos = ref.watch(todosControllerProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('TODOアプリ'),
       ),
-      body: todos.when(
-        error: (err, stack) => Text('Error2 $err'),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        data: (todos) {
-          return ListView.builder(
-            itemCount: todos.length,
-            itemBuilder: (context, index) {
-              final todo = todos[index];
-              return ListTile(
-                title: Text(todo.title),
-                subtitle: Text(todo.description),
-                trailing: Checkbox(
-                  value: todo.isCompleted,
-                  onChanged: (value) {
-                    if (value == null) return;
-                    ref
-                        .read(todosControllerProvider.notifier)
-                        .updateTodo(todo.copyWith(isCompleted: value));
-                  },
-                ),
+      body: ref.watch(todosProvider).when(
+            error: (err, stack) => Text('Error2 $err'),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            data: (todos) {
+              return ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+                  return ListTile(
+                    title: Text(todo.title),
+                    subtitle: Text(todo.description),
+                    trailing: Checkbox(
+                      value: todo.isCompleted,
+                      onChanged: (value) {
+                        if (value == null) return;
+                        ref
+                            .read(todosControllerProvider)
+                            .updateTodo(todo.copyWith(isCompleted: value));
+                      },
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
-      ),
+          ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
@@ -89,9 +87,7 @@ class TodoPage extends ConsumerWidget {
                               title: _titleController.text,
                               description: _descriptionController.text,
                             );
-                            ref
-                                .read(todosControllerProvider.notifier)
-                                .addTodo(todo);
+                            ref.read(todosControllerProvider).addTodo(todo);
                             Navigator.of(context).pop();
                             _titleController.clear();
                             _descriptionController.clear();
